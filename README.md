@@ -1,5 +1,8 @@
-# Dora's Crush
+# Kaede
 the most useless bot ever :tf:
+
+# Name?
+Don't tell us to explain
 
 # What is this?
 My poorly coded bot with minimum requirements so it can run entirely on my Chinese TV Box :tf:
