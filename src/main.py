@@ -12,19 +12,9 @@ intents.members = True
 bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 
 #Memes list
-
-#For new members
-welcome_memes = [
-    'meme1.lịnk',
-    'meme2.link',
-]
-
-
-#For members who left
-goodbye_memes = [
-    'meme1.link',
-    'meme2.link',
-]
+def get_memes():
+    meme_files = os.listdir(MEMES_FOLDER)
+    return [os.path.join(MEMES_FOLDER, file) for file in meme_files]
 
 @bot.event
 async def on_ready():
