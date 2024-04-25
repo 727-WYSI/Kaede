@@ -24,7 +24,7 @@ def get_files(folder):
 
 @bot.event
 async def on_ready():
-    print(f'We have logged in as {bot.user}')
+    print(f'Got into {bot.user}'. He is mine now!)
 
 @bot.event
 async def on_member_join(member):
