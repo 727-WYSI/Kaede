@@ -2,15 +2,16 @@ import discord
 from discord.ext import commands
 import random
 import os
+import subprocess
 from dotenv import load_dotenv
-from time.time_functions import get_time  # Import the get_time function
 
-TOKEN = 'YOUR_DISCORD_BOT_TOKEN'
-PREFIX = '?'  # Prefix for your bot commands, change as needed
-CHANNEL_ID = YOUR_CHANNEL_ID
+load_dotenv()  # Load environment variables from .env file
+
+TOKEN = os.getenv('DISCORD_BOT_TOKEN')
+PREFIX = '.k
+CHANNEL_ID = int(os.getenv('DISCORD_CHANNEL_ID'))  # Securely load your channel ID from an environment variable
 WELCOME_FOLDER = 'welcome_memes'
 GOODBYE_FOLDER = 'goodbye_memes'
-TIME_FOLDER = 'time'
 
 intents = discord.Intents.default()
 intents.members = True
@@ -24,7 +25,7 @@ def get_files(folder):
 
 @bot.event
 async def on_ready():
-    print(f'Got into {bot.user}'. He is mine now!)
+    print(f'Got into {bot.user}. He is mine now!')
 
 @bot.event
 async def on_member_join(member):
@@ -42,12 +43,6 @@ async def on_member_join(member):
             # Send the welcome message with a random welcome meme
             await channel.send(welcome_message, file=discord.File(meme_path))
 
-            # Get and send the current time for a city
-            time_city = 'America/New_York'  # Change to the desired city or timezone
-            current_time = get_time(time_city)
-            time_message = f'Current Time in {time_city}: {current_time}'
-            await channel.send(time_message)
-
 @bot.event
 async def on_member_remove(member):
     channel = bot.get_channel(CHANNEL_ID)
@@ -62,11 +57,47 @@ async def on_member_remove(member):
             )
             await channel.send(goodbye_message, file=discord.File(meme_path))
 
-            # Get and send the current time for a city
-            time_city = 'America/New_York'  # Change to the desired city or timezone
-            current_time = get_time(time_city)
-            time_message = f'Current Time in {time_city}: {current_time}'
-            await channel.send(time_message)
+@bot.command(name='memes', help='Pull out a random meme from the folder')
+async def memes(ctx):
+    meme_files = get_files(WELCOME_FOLDER)
+    if meme_files:
+        meme_path = random.choice(meme_files)
+        await ctx.send(file=discord.File(meme_path))
+    else:
+        await ctx.send('No memes found!')
+
+@bot.command(name='chat', help='Start a conversation with the bot')
+async def chat(ctx):
+    questions = [
+        "What's your favorite hobby?",
+        "What's the last book you read?",
+        "Do you have any pets?",
+        "What's your favorite movie?"
+    ]
+
+    def check(m):
+        return m.author == ctx.author and m.channel == ctx.channel
+
+    for question in questions:
+        await ctx.send(question)
+        try:
+            response = await bot.wait_for('message', check=check, timeout=60.0)
+            await ctx.send(f'You answered: {response.content}')
+        except asyncio.TimeoutError:
+            await ctx.send('You took too long to answer!')
+            break
+
+@bot.command(name='ping', help='Ping a website and show basic info')
+async def ping(ctx, website: str):
+    try:
+        output = subprocess.check_output(["ping", "-c", "1", website], universal_newlines=True)
+        lines = output.split('\n')
+        for line in lines:
+            if "bytes from" in line:
+                await ctx.send(line)
+                break
+    except subprocess.CalledProcessError:
+        await ctx.send("Failed to ping the website.")
 
 @bot.command(name='owo', help='Responds with owo')
 async def owo(ctx):
